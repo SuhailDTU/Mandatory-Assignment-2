@@ -103,8 +103,10 @@ void *mymalloc(size_t requested)
 			return NULL;
 		}
 
+		//proceed if it is
 
 		struct memoryList *currentblock = head;
+		
 		//move to next block until adequate block or end of list
 		while(((currentblock->alloc == 1) || (currentblock->size < requested)) && (currentblock->next != NULL) ){
 			currentblock = currentblock->next;
