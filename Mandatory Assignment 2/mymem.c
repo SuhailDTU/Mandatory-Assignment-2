@@ -106,7 +106,7 @@ void *mymalloc(size_t requested)
 		//proceed if it is
 
 		struct memoryList *currentblock = head;
-		
+
 		//move to next block until adequate block or end of list
 		while(((currentblock->alloc == 1) || (currentblock->size < requested)) && (currentblock->next != NULL) ){
 			currentblock = currentblock->next;
@@ -195,8 +195,6 @@ void myfree(void* block)
 	//#############MERGING#################
 	//if block behind is unallocated merge
 	if ((currentBlock->last != NULL) && (currentBlock->last->alloc == 0)){
-		printf("behind is allo dealloc");
-		fflush(stdout);
 		//make block behind us new current block save old as tmp
 		tmpBlock = currentBlock;
 		currentBlock = currentBlock->last;
@@ -217,8 +215,6 @@ void myfree(void* block)
 	//if block infront is also unallocated also merge
 	//set
 	if((currentBlock->next != NULL) && (currentBlock->next->alloc == 0)){
-		printf("front is also dealloc");
-		fflush(stdout);
 		//designate block to be merged as tmp
 		tmpBlock = currentBlock->next;
 		currentBlock->size = ((currentBlock->size) + (tmpBlock->size));
