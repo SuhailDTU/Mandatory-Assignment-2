@@ -92,57 +92,70 @@ void initmem(strategies strategy, size_t sz)
 void *mymalloc(size_t requested)
 {
 	assert((int)myStrategy > 0);
-	
+
+	//check if initialized
+	//if not return NULL
+	if (head == NULL){
+		return NULL;
+	}
+
+	//define traversal pointer, new block pointer and other neccesary data variables all strategies use
+	struct memoryList *currentblock = head;
+	struct memoryList *newBlock = NULL;
+	struct memoryList *tempNext = NULL;
+	int leftoverSize = 0;
+
 	switch (myStrategy)
 	  {
 	  case NotSet: 
 	            return NULL;
 	  case First: ;
-		//check if initialized
-		if (head == NULL){
-			return NULL;
-		}
 
-		//proceed if it is
+	  	printf("head block size %d\n", currentblock->size );
+		
 
-		struct memoryList *currentblock = head;
+		//##########Traverse memory list until location that fits strategy#############
 
 		//move to next block until adequate block or end of list
 		while(((currentblock->alloc == 1) || (currentblock->size < requested)) && (currentblock->next != NULL) ){
 			currentblock = currentblock->next;
 			//printf("looking to allocate\n");
 		}
-		printf("allocated %d \n", requested);
 
 		//if we are at the end of list without fullfilling memory requirements return null
 		if((currentblock->alloc == 1) || (currentblock->size < requested)){
 			return NULL;
 		}//if not continue memory allocation
 
+		printf("allocated %d \n", requested);
+		//##########Change size of block, allocate it and create new block with remaining memory #############
+
 		//leftover size
-		int leftoverSize = currentblock->size - requested;
+		leftoverSize = currentblock->size - requested;
 
 		//set new size of the block, but keep same pointer
 		currentblock->alloc = 1;
 		currentblock->size = requested;
 
 
-		//new block with leftover mem
+		//create new block with leftover mem
 		//allocate rest of mem to new block
-		struct memoryList *newBlock = malloc(sizeof(struct memoryList));
+		newBlock = malloc(sizeof(struct memoryList));
 		newBlock->ptr = currentblock->ptr + requested; 
 		newBlock->alloc = 0;
 		newBlock->size = leftoverSize;
 
+		//##########Connecting new block to memory list #############
+
 		//check if current element has a next
-		//if not connect directly
-		if(currentblock->next == NULL){
+		if(currentblock->next == NULL){	//if not connect directly
 			currentblock->next = newBlock;
 			newBlock->last = currentblock;
 			newBlock->next = NULL;
 		}else{ // if so connect place between them
-			struct memoryList *tempNext;
-			tempNext = currentblock->next;//save current blk next in temp
+			//save current blk next in temp
+			//struct memoryList *tempNext;
+			tempNext = currentblock->next;
 
 			//connect new block to current block
 			currentblock->next = newBlock;
@@ -153,15 +166,76 @@ void *mymalloc(size_t requested)
 			tempNext->last = newBlock;
 
 		}
-				//update allocated mem
-				allocated_mem = allocated_mem + requested;
+		//update allocated mem
+		allocated_mem = allocated_mem + requested;
 
-				//return pointer to newly allocated memory
-	    	    return currentblock->ptr;
+		//return pointer to newly allocated memory
+		return currentblock->ptr;
+
 	  case Best:
 	            return NULL;
-	  case Worst:
-	            return NULL;
+	  case Worst: ;
+
+			struct memoryList *biggestBlock;
+			int biggestSize = 0;
+
+			//##########Traverse memory list until location that fits strategy#############
+			//traverse whole list once to find the biggest block
+			//if a block is not allocated and its size is bigger than what we have saved replace our saved block
+			while(currentblock != NULL){
+				if((currentblock->alloc == 0) && (currentblock->size > biggestSize)){
+					biggestSize = currentblock->size;
+					biggestBlock = currentblock;
+				}
+				currentblock = currentblock->next;
+			}
+
+			currentblock = biggestBlock;//set chosen block as current
+
+			//could not find big enough block
+			if(requested > biggestSize){
+				return NULL;
+			}
+			printf("allocated %d \n", requested);
+			//##########Change size of block, allocate it and create new block with remaining memory #############
+			//leftover size
+			leftoverSize = currentblock->size - requested;
+
+			//set new size of the block, but keep same pointer
+			currentblock->alloc = 1;
+			currentblock->size = requested;
+
+			//allocate new block and give remaining mem to it
+			newBlock = malloc(sizeof(struct memoryList));
+			newBlock->alloc = 0;
+			newBlock->ptr = currentblock->ptr + requested;
+			newBlock->size = leftoverSize;
+
+			//##########Connecting new block to memory list #############
+			//check if current element has a next
+			if(currentblock->next == NULL){	//if not connect directly
+				currentblock->next = newBlock;
+				newBlock->last = currentblock;
+				newBlock->next = NULL;
+			}else{ // if so connect place between them
+				//save current blk next in temp
+				//struct memoryList *tempNext;
+				tempNext = currentblock->next;
+
+				//connect new block to current block
+				currentblock->next = newBlock;
+				newBlock->last = currentblock;
+
+				//use saved pointer to connect the new block to the next block
+				newBlock->next = tempNext;
+				tempNext->last = newBlock;
+
+			}
+			//update allocated mem
+			allocated_mem = allocated_mem + requested;
+
+			//return ptr to newly allocated mem
+	        return currentblock->ptr;
 	  case Next:
 	            return NULL;
 	  }
@@ -176,6 +250,7 @@ void myfree(void* block)
 	struct memoryList* tmpBlock = head;
 
 
+	//#############FIND_BLOCK#################
 	while ((currentBlock!= NULL) && (currentBlock->ptr != block) )
 	{
 		currentBlock = currentBlock->next;
@@ -186,7 +261,7 @@ void myfree(void* block)
 		return;
 	}
 
-	//deallocate 
+	//#############DEALLOCATE################
 	printf("deallocating %d\n", currentBlock->size);
 	currentBlock->alloc = 0;
 	allocated_mem = allocated_mem - currentBlock->size;
@@ -213,7 +288,6 @@ void myfree(void* block)
 	}
 	
 	//if block infront is also unallocated also merge
-	//set
 	if((currentBlock->next != NULL) && (currentBlock->next->alloc == 0)){
 		//designate block to be merged as tmp
 		tmpBlock = currentBlock->next;
