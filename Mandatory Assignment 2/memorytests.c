@@ -126,22 +126,23 @@ int do_stress_tests(int argc, char **argv)
 	int strategy = strategyFromString(*(argv+1));
 
 	unlink("tests.log");  // We want a new log file
-
-	do_randomized_test(strategy,10000,0.25,1,1000,10000);
-	do_randomized_test(strategy,10000,0.25,1,2000,10000);
-	do_randomized_test(strategy,10000,0.25,1000,2000,10000);
-	do_randomized_test(strategy,10000,0.25,1,3000,10000);
-	do_randomized_test(strategy,10000,0.25,1,4000,10000); 
-	do_randomized_test(strategy,10000,0.25,1,5000,10000);
-
+	//printf("\ntestbl 1\n");
+	do_randomized_test(strategy,10000,0.25,1,1000,10000);	//printf("\n130\n");
+	do_randomized_test(strategy,10000,0.25,1,2000,10000);  //printf("\n131\n");
+	do_randomized_test(strategy,10000,0.25,1000,2000,10000);  //printf("\n132\n");
+	do_randomized_test(strategy,10000,0.25,1,3000,10000);  //printf("\n133\n");
+	do_randomized_test(strategy,10000,0.25,1,4000,10000);   //printf("\n134\n");
+	do_randomized_test(strategy,10000,0.25,1,5000,10000);  //printf("\n135\n");
+	//printf("\ntestbl 2\n");
 	do_randomized_test(strategy,10000,0.5,1,1000,10000);
 	do_randomized_test(strategy,10000,0.5,1,2000,10000);
 	do_randomized_test(strategy,10000,0.5,1000,2000,10000);
 	do_randomized_test(strategy,10000,0.5,1,3000,10000); 
 	do_randomized_test(strategy,10000,0.5,1,4000,10000);
 	do_randomized_test(strategy,10000,0.5,1,5000,10000);
-
+	//printf("\nbefore dodgy test\n");
 	do_randomized_test(strategy,10000,0.5,1000,1000,10000); /* watch what happens with this test!...why? */
+	//printf("\ndodgy test\n");
 
 	do_randomized_test(strategy,10000,0.75,1,1000,10000);
 	do_randomized_test(strategy,10000,0.75,500,1000,10000);
@@ -401,11 +402,15 @@ int test_alloc_4(int argc, char **argv) {
 			}
 			lastPointer = pointer;
 		}
+		//printf("\n allocated \n");
+		fflush(stdout);
 
 		for (i = 1; i < 100; i+= 2)
 		{
 			myfree(mem_pool() + i);
 		}
+		//printf("freeing \n");
+		fflush(stdout);
 
 		for (i = 1; i < 100; i+=2)
 		{
@@ -417,6 +422,8 @@ int test_alloc_4(int argc, char **argv) {
 			}
 			lastPointer = pointer;
 		}
+		//printf("testing func\n");
+		fflush(stdout);
 
 		if (mem_holes() != correct_holes)
 		{

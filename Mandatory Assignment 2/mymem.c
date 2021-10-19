@@ -189,8 +189,12 @@ void *mymalloc(size_t requested)
 
 		}
 
-
+		
 		currentblock = memoryBestFit;
+		
+		if(currentblock == NULL){
+			return NULL;
+		}
 
 		//printf("allocated %d \n", requested);
 
@@ -308,27 +312,35 @@ void *mymalloc(size_t requested)
 	  case Next: ;
 
 		//choose starting point
-		if(lastAllocatedBlock == NULL){//if not allocated yet
+		if((lastAllocatedBlock == NULL) || (lastAllocatedBlock->next == NULL)){
 			currentblock = head;
-		}else{//if allocated start from block after
-			currentblock = lastAllocatedBlock->next;
+		}else{
+			currentblock = lastAllocatedBlock;
 		}
 	  	
 		//##########Traverse memory list until location that fits strategy#############
-		while(currentblock != lastAllocatedBlock ){
+		do{
 			if((currentblock->size >= requested) && (currentblock->alloc == 0)){
 				break;
 			}
-			currentblock = currentblock->next;
+	
+			//wraparound or not
 			if(currentblock->next == NULL){
 				currentblock = head;
+			}else{
+				currentblock = currentblock->next;
 			}
-		}
+		}while (currentblock != lastAllocatedBlock);
 
+		
+		//printf("allocated block address: %p \n", currentblock->ptr);
+		//fflush(stdout);
+	
 		//could not find block
 		if(currentblock == lastAllocatedBlock){
 			return NULL;
 		}
+
 		//printf("allocated %d \n", requested);
 
 		//##########Change size of block, allocate it and create new block with remaining memory #############
@@ -341,7 +353,11 @@ void *mymalloc(size_t requested)
 		currentblock->size = requested;
 
 		//if it fits perfectly no need for extra block for unallocated space
+	    //printf("allocated block address: %p \n", currentblock->ptr);
+		//fflush(stdout);
+
 		if(leftoverSize == 0){
+			lastAllocatedBlock = currentblock;
 			return currentblock->ptr;
 		}
 
@@ -351,6 +367,9 @@ void *mymalloc(size_t requested)
 		newBlock->alloc = 0;
 		newBlock->ptr = currentblock->ptr + requested;
 		newBlock->size = leftoverSize;
+
+
+
 
 		//##########Connecting new block to memory list #############
 		//check if current element has a next
@@ -374,8 +393,11 @@ void *mymalloc(size_t requested)
 		}
 
 
-		lastAllocatedBlock = currentblock;
 
+	
+		lastAllocatedBlock = currentblock;
+		//printf("last allocated block: %p\n", lastAllocatedBlock->ptr);
+		
 		return currentblock->ptr;
 
 	  default:
@@ -622,7 +644,7 @@ void print_memory()
 
 	//print all
 	while(node != NULL){
-		printf("size\t: %3d, allocated\t: %d\n", node->size, node->alloc);
+		printf("size\t: %3d, allocated\t: %d, address: \t: %p\n", node->size, node->alloc, node->ptr);
 		node = node->next;
 	}
 	return;
@@ -659,7 +681,7 @@ void try_mymem(int argc, char **argv) {
 	   Each algorithm should produce a different layout. */
 	
 	initmem(strat,500);
-	
+	/*
 	a = mymalloc(100);
 	b = mymalloc(100);
 	c = mymalloc(100);
@@ -667,6 +689,41 @@ void try_mymem(int argc, char **argv) {
 	d = mymalloc(50);
 	myfree(a);
 	e = mymalloc(25);
+	
+	void *f = mymalloc(125);
+	void *u = mymalloc(100); 
+	*/
+
+
+	a = mymalloc(100);
+	b = mymalloc(100);
+	c = mymalloc(100);
+	d = mymalloc(100);
+	e = mymalloc(100);
+
+	
+	myfree(b);
+	myfree(d);
+
+	void *f = mymalloc(100);
+
+
+/*
+		for (i = 0; i < 100; i++){
+		void* pointer = mymalloc(1);
+		if ( i > 0 && pointer != (lastPointer+1) ){
+			printf("Allocation with %s was not sequential at %i; expected %p, actual %p\n", strategy_name(strategy), i,lastPointer+1,pointer);
+			return 1;
+		}
+			lastPointer = pointer;
+		}
+
+		for (i = 1; i < 100; i+= 2)
+		{
+			myfree(mem_pool() + i);
+		}
+
+*/
 
 	print_memory();
 	print_memory_status();
