@@ -30,7 +30,6 @@ void *myMemory = NULL;
 
 static struct memoryList *head;
 static struct memoryList *next;
-size_t allocated_mem = 0;
 
 struct memoryList *lastAllocatedBlock = NULL;
 
@@ -70,7 +69,6 @@ void initmem(strategies strategy, size_t sz)
 		free(currentBlock);
 	}
 	//reset bookkeping
-	allocated_mem = 0;
 	lastAllocatedBlock = NULL;
 
 	/* TODO: Initialize memory management structure. */
@@ -126,7 +124,7 @@ void *mymalloc(size_t requested)
 			return NULL;
 		}//if not continue memory allocation
 
-		printf("allocated %d \n", requested);
+		//printf("allocated %d \n", requested);
 		//##########Change size of block, allocate it and create new block with remaining memory #############
 
 		//leftover size
@@ -169,8 +167,6 @@ void *mymalloc(size_t requested)
 			tempNext->last = newBlock;
 
 		}
-		//update allocated mem
-		allocated_mem = allocated_mem + requested;
 
 		//return pointer to newly allocated memory
 		return currentblock->ptr;
@@ -182,28 +178,21 @@ void *mymalloc(size_t requested)
 
 		
 		while(currentblock != NULL){
-			printf("current size: %d\n", currentblock->size);
-
 			if((currentblock->size >= requested) && (currentblock->alloc == 0) && (memoryBestFit == NULL)){
 				memoryBestFit = currentblock;
 				bestFitSize = currentblock->size;
-				printf("entered if");
 			}else if((currentblock->size >= requested) && (currentblock->alloc == 0) && (currentblock->size < bestFitSize)){
 				memoryBestFit = currentblock;
 				bestFitSize = currentblock->size;
-				printf("entered else");
 			}
-			printf("continued\n");
 			currentblock = currentblock->next;
 
 		}
 
-		printf("header has size %d\n", head->size);
-		printf("got block pointer %p\n", memoryBestFit);
 
 		currentblock = memoryBestFit;
 
-		printf("allocated %d \n", requested);
+		//printf("allocated %d \n", requested);
 
 		//##########Change size of block, allocate it and create new block with remaining memory #############
 		//leftover size
@@ -245,8 +234,6 @@ void *mymalloc(size_t requested)
 			tempNext->last = newBlock;
 
 		}
-		//update allocated mem
-		allocated_mem = allocated_mem + requested;
 
 		
 	    return currentblock->ptr;
@@ -273,7 +260,7 @@ void *mymalloc(size_t requested)
 			if(requested > biggestSize){
 				return NULL;
 			}
-			printf("allocated %d \n", requested);
+			//printf("allocated %d \n", requested);
 			//##########Change size of block, allocate it and create new block with remaining memory #############
 			//leftover size
 			leftoverSize = currentblock->size - requested;
@@ -315,8 +302,6 @@ void *mymalloc(size_t requested)
 				tempNext->last = newBlock;
 
 			}
-			//update allocated mem
-			allocated_mem = allocated_mem + requested;
 
 			//return ptr to newly allocated mem
 	        return currentblock->ptr;
@@ -344,7 +329,7 @@ void *mymalloc(size_t requested)
 		if(currentblock == lastAllocatedBlock){
 			return NULL;
 		}
-		printf("allocated %d \n", requested);
+		//printf("allocated %d \n", requested);
 
 		//##########Change size of block, allocate it and create new block with remaining memory #############
 		//leftover size
@@ -387,8 +372,6 @@ void *mymalloc(size_t requested)
 			tempNext->last = newBlock;
 
 		}
-		//update allocated mem
-		allocated_mem = allocated_mem + requested;
 
 
 		lastAllocatedBlock = currentblock;
@@ -422,9 +405,8 @@ void myfree(void* block)
 	}
 
 	//#############DEALLOCATE################
-	printf("deallocating %d\n", currentBlock->size);
+	//printf("deallocating %d\n", currentBlock->size);
 	currentBlock->alloc = 0;
-	allocated_mem = allocated_mem - currentBlock->size;
 
 
 	//#############MERGING#################
@@ -498,7 +480,18 @@ int mem_holes()
 /* Get the number of bytes allocated */
 int mem_allocated()
 {
-	return allocated_mem;
+	struct memoryList* currentBlock = head;
+	int allocatedsum = 0;
+
+	while(currentBlock != NULL){
+
+		if(currentBlock->alloc == 1){
+			allocatedsum = currentBlock->size + allocatedsum;
+		}
+		currentBlock = currentBlock->next;
+	}	
+
+	return allocatedsum;
 }
 
 /* Number of non-allocated bytes */
@@ -528,12 +521,30 @@ int mem_largest_free()
 /* Number of free blocks smaller than or equal to"size" bytes. */
 int mem_small_free(int size)
 {
-	return 0;
+	struct memoryList *currentBlock = head;
+	int numberOfBlocks = 0;
+
+	while(currentBlock != NULL){
+		if((currentBlock->size <= size) && (currentBlock->alloc == 0) ){
+			numberOfBlocks++;
+		}
+		currentBlock = currentBlock->next;
+	}
+	return numberOfBlocks;
 }       
 
 char mem_is_alloc(void *ptr)
 {
-        return 0;
+	struct memoryList *currentBlock = head;
+
+	while(currentBlock != NULL){
+		if((currentBlock->ptr <= ptr) && (ptr < (currentBlock->ptr + currentBlock->size)) ){
+			return 'y';
+		}
+
+		currentBlock = currentBlock->next;
+	}
+    return 'n';
 }
 
 /* 
