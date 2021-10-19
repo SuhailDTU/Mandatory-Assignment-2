@@ -32,7 +32,7 @@ static struct memoryList *head;
 static struct memoryList *next;
 size_t allocated_mem = 0;
 
-struct myList *lastAllocatedBlock = NULL;
+struct memoryList *lastAllocatedBlock = NULL;
 
 /* initmem must be called prior to mymalloc and myfree.
 
@@ -71,7 +71,7 @@ void initmem(strategies strategy, size_t sz)
 	}
 	//reset bookkeping
 	allocated_mem = 0;
-	lastAllocatedBlock = head;
+	lastAllocatedBlock = NULL;
 
 	/* TODO: Initialize memory management structure. */
 
@@ -136,6 +136,10 @@ void *mymalloc(size_t requested)
 		currentblock->alloc = 1;
 		currentblock->size = requested;
 
+		//if it fits perfectly no need for extra block for unallocated space
+		if(leftoverSize == 0){
+			return currentblock->ptr;
+		}
 
 		//create new block with leftover mem
 		//allocate rest of mem to new block
@@ -209,6 +213,12 @@ void *mymalloc(size_t requested)
 		currentblock->alloc = 1;
 		currentblock->size = requested;
 
+		//if it fits perfectly no need for extra block for unallocated space
+		if(leftoverSize == 0){
+			return currentblock->ptr;
+		}
+
+
 		//allocate new block and give remaining mem to it
 		newBlock = malloc(sizeof(struct memoryList));
 		newBlock->alloc = 0;
@@ -237,6 +247,8 @@ void *mymalloc(size_t requested)
 		}
 		//update allocated mem
 		allocated_mem = allocated_mem + requested;
+
+		
 	    return currentblock->ptr;
 
 	  case Worst: ;
@@ -266,9 +278,16 @@ void *mymalloc(size_t requested)
 			//leftover size
 			leftoverSize = currentblock->size - requested;
 
+
 			//set new size of the block, but keep same pointer
 			currentblock->alloc = 1;
 			currentblock->size = requested;
+
+			//if it fits perfectly no need for extra block for unallocated space
+			if(leftoverSize == 0){
+				return currentblock->ptr;
+			}
+
 
 			//allocate new block and give remaining mem to it
 			newBlock = malloc(sizeof(struct memoryList));
@@ -301,8 +320,81 @@ void *mymalloc(size_t requested)
 
 			//return ptr to newly allocated mem
 	        return currentblock->ptr;
-	  case Next:
-	            return NULL;
+	  case Next: ;
+
+		//choose starting point
+		if(lastAllocatedBlock == NULL){//if not allocated yet
+			currentblock = head;
+		}else{//if allocated start from block after
+			currentblock = lastAllocatedBlock->next;
+		}
+	  	
+		//##########Traverse memory list until location that fits strategy#############
+		while(currentblock != lastAllocatedBlock ){
+			if((currentblock->size >= requested) && (currentblock->alloc == 0)){
+				break;
+			}
+			currentblock = currentblock->next;
+			if(currentblock->next == NULL){
+				currentblock = head;
+			}
+		}
+
+		//could not find block
+		if(currentblock == lastAllocatedBlock){
+			return NULL;
+		}
+		printf("allocated %d \n", requested);
+
+		//##########Change size of block, allocate it and create new block with remaining memory #############
+		//leftover size
+		leftoverSize = currentblock->size - requested;
+
+
+		//set new size of the block, but keep same pointer
+		currentblock->alloc = 1;
+		currentblock->size = requested;
+
+		//if it fits perfectly no need for extra block for unallocated space
+		if(leftoverSize == 0){
+			return currentblock->ptr;
+		}
+
+
+		//allocate new block and give remaining mem to it
+		newBlock = malloc(sizeof(struct memoryList));
+		newBlock->alloc = 0;
+		newBlock->ptr = currentblock->ptr + requested;
+		newBlock->size = leftoverSize;
+
+		//##########Connecting new block to memory list #############
+		//check if current element has a next
+		if(currentblock->next == NULL){	//if not connect directly
+			currentblock->next = newBlock;
+			newBlock->last = currentblock;
+			newBlock->next = NULL;
+		}else{ // if so connect place between them
+			//save current blk next in temp
+			//struct memoryList *tempNext;
+			tempNext = currentblock->next;
+
+			//connect new block to current block
+			currentblock->next = newBlock;
+			newBlock->last = currentblock;
+
+			//use saved pointer to connect the new block to the next block
+			newBlock->next = tempNext;
+			tempNext->last = newBlock;
+
+		}
+		//update allocated mem
+		allocated_mem = allocated_mem + requested;
+
+
+		lastAllocatedBlock = currentblock;
+
+		return currentblock->ptr;
+
 	  default:
 		break;
 	  }
