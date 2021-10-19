@@ -110,10 +110,6 @@ void *mymalloc(size_t requested)
 	  case NotSet: 
 	            return NULL;
 	  case First: ;
-
-	  	printf("head block size %d\n", currentblock->size );
-		
-
 		//##########Traverse memory list until location that fits strategy#############
 
 		//move to next block until adequate block or end of list
