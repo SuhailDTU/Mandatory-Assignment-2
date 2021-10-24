@@ -5,6 +5,9 @@
 #include "mymem.h"
 #include <time.h>
 
+//functions to ease overview of program
+struct memoryList* createBlock(int size, int allocation, void *pointerToMem);
+void insertBlock(struct memoryList *currentblock, struct memoryList *newBlock, struct memoryList *tempNext);
 
 /* The main structure for implementing memory allocation.
  * You may change this to fit your implementation.
@@ -116,7 +119,6 @@ void *mymalloc(size_t requested)
 		//move to next block until adequate block or end of list
 		while(((currentblock->alloc == 1) || (currentblock->size < requested)) && (currentblock->next != NULL) ){
 			currentblock = currentblock->next;
-			//printf("looking to allocate\n");
 		}
 
 		//if we are at the end of list without fullfilling memory requirements return null
@@ -124,7 +126,6 @@ void *mymalloc(size_t requested)
 			return NULL;
 		}//if not continue memory allocation
 
-		//printf("allocated %d \n", requested);
 		//##########Change size of block, allocate it and create new block with remaining memory #############
 
 		//leftover size
@@ -138,35 +139,14 @@ void *mymalloc(size_t requested)
 		if(leftoverSize == 0){
 			return currentblock->ptr;
 		}
-
 		//create new block with leftover mem
 		//allocate rest of mem to new block
-		newBlock = malloc(sizeof(struct memoryList));
-		newBlock->ptr = currentblock->ptr + requested; 
-		newBlock->alloc = 0;
-		newBlock->size = leftoverSize;
+
+		newBlock = createBlock(leftoverSize, 0, (currentblock->ptr + requested));
 
 		//##########Connecting new block to memory list #############
 
-		//check if current element has a next
-		if(currentblock->next == NULL){	//if not connect directly
-			currentblock->next = newBlock;
-			newBlock->last = currentblock;
-			newBlock->next = NULL;
-		}else{ // if so connect place between them
-			//save current blk next in temp
-			//struct memoryList *tempNext;
-			tempNext = currentblock->next;
-
-			//connect new block to current block
-			currentblock->next = newBlock;
-			newBlock->last = currentblock;
-
-			//use saved pointer to connect the new block to the next block
-			newBlock->next = tempNext;
-			tempNext->last = newBlock;
-
-		}
+		insertBlock(currentblock, newBlock, tempNext);
 
 		//return pointer to newly allocated memory
 		return currentblock->ptr;
@@ -176,7 +156,7 @@ void *mymalloc(size_t requested)
 		struct memoryList *memoryBestFit = NULL;
 		int bestFitSize = 0;
 
-		
+		//##########Traverse memory list until location that fits strategy#############
 		while(currentblock != NULL){
 			if((currentblock->size >= requested) && (currentblock->alloc == 0) && (memoryBestFit == NULL)){
 				memoryBestFit = currentblock;
@@ -189,14 +169,13 @@ void *mymalloc(size_t requested)
 
 		}
 
-		
+		//set the block we found as current block
 		currentblock = memoryBestFit;
 		
+		//if we found no suitable block we return NULL
 		if(currentblock == NULL){
 			return NULL;
 		}
-
-		//printf("allocated %d \n", requested);
 
 		//##########Change size of block, allocate it and create new block with remaining memory #############
 		//leftover size
@@ -210,34 +189,12 @@ void *mymalloc(size_t requested)
 		if(leftoverSize == 0){
 			return currentblock->ptr;
 		}
-
-
 		//allocate new block and give remaining mem to it
-		newBlock = malloc(sizeof(struct memoryList));
-		newBlock->alloc = 0;
-		newBlock->ptr = currentblock->ptr + requested;
-		newBlock->size = leftoverSize;
+		newBlock = createBlock(leftoverSize, 0, (currentblock->ptr + requested));
+
 
 		//##########Connecting new block to memory list #############
-		//check if current element has a next
-		if(currentblock->next == NULL){	//if not connect directly
-			currentblock->next = newBlock;
-			newBlock->last = currentblock;
-			newBlock->next = NULL;
-		}else{ // if so connect place between them
-			//save current blk next in temp
-			//struct memoryList *tempNext;
-			tempNext = currentblock->next;
-
-			//connect new block to current block
-			currentblock->next = newBlock;
-			newBlock->last = currentblock;
-
-			//use saved pointer to connect the new block to the next block
-			newBlock->next = tempNext;
-			tempNext->last = newBlock;
-
-		}
+		insertBlock(currentblock, newBlock, tempNext);
 
 		
 	    return currentblock->ptr;
@@ -264,11 +221,10 @@ void *mymalloc(size_t requested)
 			if(requested > biggestSize){
 				return NULL;
 			}
-			//printf("allocated %d \n", requested);
+
 			//##########Change size of block, allocate it and create new block with remaining memory #############
 			//leftover size
 			leftoverSize = currentblock->size - requested;
-
 
 			//set new size of the block, but keep same pointer
 			currentblock->alloc = 1;
@@ -279,33 +235,11 @@ void *mymalloc(size_t requested)
 				return currentblock->ptr;
 			}
 
-
 			//allocate new block and give remaining mem to it
-			newBlock = malloc(sizeof(struct memoryList));
-			newBlock->alloc = 0;
-			newBlock->ptr = currentblock->ptr + requested;
-			newBlock->size = leftoverSize;
+			newBlock = createBlock(leftoverSize, 0, (currentblock->ptr + requested));
 
 			//##########Connecting new block to memory list #############
-			//check if current element has a next
-			if(currentblock->next == NULL){	//if not connect directly
-				currentblock->next = newBlock;
-				newBlock->last = currentblock;
-				newBlock->next = NULL;
-			}else{ // if so connect place between them
-				//save current blk next in temp
-				//struct memoryList *tempNext;
-				tempNext = currentblock->next;
-
-				//connect new block to current block
-				currentblock->next = newBlock;
-				newBlock->last = currentblock;
-
-				//use saved pointer to connect the new block to the next block
-				newBlock->next = tempNext;
-				tempNext->last = newBlock;
-
-			}
+			insertBlock(currentblock, newBlock, tempNext);
 
 			//return ptr to newly allocated mem
 	        return currentblock->ptr;
@@ -347,7 +281,6 @@ void *mymalloc(size_t requested)
 		//leftover size
 		leftoverSize = currentblock->size - requested;
 
-
 		//set new size of the block, but keep same pointer
 		currentblock->alloc = 1;
 		currentblock->size = requested;
@@ -360,41 +293,16 @@ void *mymalloc(size_t requested)
 			lastAllocatedBlock = currentblock;
 			return currentblock->ptr;
 		}
-
-
 		//allocate new block and give remaining mem to it
-		newBlock = malloc(sizeof(struct memoryList));
-		newBlock->alloc = 0;
-		newBlock->ptr = currentblock->ptr + requested;
-		newBlock->size = leftoverSize;
-
+		newBlock = createBlock(leftoverSize, 0, (currentblock->ptr + requested));
 
 
 
 		//##########Connecting new block to memory list #############
-		//check if current element has a next
-		if(currentblock->next == NULL){	//if not connect directly
-			currentblock->next = newBlock;
-			newBlock->last = currentblock;
-			newBlock->next = NULL;
-		}else{ // if so connect place between them
-			//save current blk next in temp
-			//struct memoryList *tempNext;
-			tempNext = currentblock->next;
-
-			//connect new block to current block
-			currentblock->next = newBlock;
-			newBlock->last = currentblock;
-
-			//use saved pointer to connect the new block to the next block
-			newBlock->next = tempNext;
-			tempNext->last = newBlock;
-
-		}
+		insertBlock(currentblock, newBlock, tempNext);
 
 
 
-	
 		lastAllocatedBlock = currentblock;
 		//printf("last allocated block: %p\n", lastAllocatedBlock->ptr);
 		
@@ -681,7 +589,7 @@ void try_mymem(int argc, char **argv) {
 	   Each algorithm should produce a different layout. */
 	
 	initmem(strat,500);
-	/*
+	
 	a = mymalloc(100);
 	b = mymalloc(100);
 	c = mymalloc(100);
@@ -690,11 +598,11 @@ void try_mymem(int argc, char **argv) {
 	myfree(a);
 	e = mymalloc(25);
 	
-	void *f = mymalloc(125);
-	void *u = mymalloc(100); 
-	*/
+	//void *f = mymalloc(125);
+	//void *u = mymalloc(100); 
+	
 
-
+/*
 	a = mymalloc(100);
 	b = mymalloc(100);
 	c = mymalloc(100);
@@ -706,32 +614,46 @@ void try_mymem(int argc, char **argv) {
 	myfree(d);
 
 	void *f = mymalloc(100);
-
-
-/*
-		for (i = 0; i < 100; i++){
-		void* pointer = mymalloc(1);
-		if ( i > 0 && pointer != (lastPointer+1) ){
-			printf("Allocation with %s was not sequential at %i; expected %p, actual %p\n", strategy_name(strategy), i,lastPointer+1,pointer);
-			return 1;
-		}
-			lastPointer = pointer;
-		}
-
-		for (i = 1; i < 100; i+= 2)
-		{
-			myfree(mem_pool() + i);
-		}
-
 */
+
 
 	print_memory();
 	print_memory_status();
 	
 }
 
-void insertBlock(struct memoryList *currentBlock, struct memoryList *newBlock){
+//the function takes the node indicated as "newBlock" and places it after the location of the "currentBlock"
+void insertBlock(struct memoryList *currentblock, struct memoryList *newBlock, struct memoryList *tempNext){
+	
+	//we first check whether current block has a next node
+	if(currentblock->next == NULL){	//if not connect directly
+			currentblock->next = newBlock;
+			newBlock->last = currentblock;
+			newBlock->next = NULL;
+	}else{ // if so connect place between them
+			//save current blk next in temp
+			//struct memoryList *tempNext;
+			tempNext = currentblock->next;
 
+			//connect new block to current block
+			currentblock->next = newBlock;
+			newBlock->last = currentblock;
+
+			//use saved pointer to connect the new block to the next block
+			newBlock->next = tempNext;
+			tempNext->last = newBlock;
+
+	}
 	
 }
+
+//creates a new block ot place in linkedlist and return its pointer to the newBlock var
+struct memoryList* createBlock(int size, int allocation, void *pointerToMem){
+		struct memoryList* newBlock = (struct memoryList*)malloc(sizeof(struct memoryList));
+		newBlock->alloc = allocation;
+		newBlock->ptr = pointerToMem;
+		newBlock->size = size;
+
+		return newBlock;
+} 
 
