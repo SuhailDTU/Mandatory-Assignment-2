@@ -28,3 +28,7 @@ void* mem_pool();
 void print_memory();
 void print_memory_status();
 void try_mymem(int argc, char **argv);
+
+//functions to ease overview of program
+struct memoryList* createBlock(int size, int allocation, void *pointerToMem);
+void insertBlock(struct memoryList *currentblock, struct memoryList *newBlock, struct memoryList *tempNext);

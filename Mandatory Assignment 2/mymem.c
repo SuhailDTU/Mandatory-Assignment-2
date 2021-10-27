@@ -5,9 +5,7 @@
 #include "mymem.h"
 #include <time.h>
 
-//functions to ease overview of program
-struct memoryList* createBlock(int size, int allocation, void *pointerToMem);
-void insertBlock(struct memoryList *currentblock, struct memoryList *newBlock, struct memoryList *tempNext);
+
 
 /* The main structure for implementing memory allocation.
  * You may change this to fit your implementation.
