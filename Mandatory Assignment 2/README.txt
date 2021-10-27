@@ -142,3 +142,4 @@ why this/these and not others.
 over a bit array, where every bit tells whether its corresponding byte is
 allocated.
 
+test @Thomasbt
