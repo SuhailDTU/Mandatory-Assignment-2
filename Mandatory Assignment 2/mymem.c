@@ -256,24 +256,19 @@ void *mymalloc(size_t requested)
 				break;
 			}
 	
-			//wraparound or not
+			//wraparound to start or proceed to next block
 			if(currentblock->next == NULL){
 				currentblock = head;
 			}else{
 				currentblock = currentblock->next;
 			}
+			
 		}while (currentblock != lastAllocatedBlock);
-
-		
-		//printf("allocated block address: %p \n", currentblock->ptr);
-		//fflush(stdout);
 	
 		//could not find block
 		if(currentblock == lastAllocatedBlock){
 			return NULL;
 		}
-
-		//printf("allocated %d \n", requested);
 
 		//##########Change size of block, allocate it and create new block with remaining memory #############
 		//leftover size
@@ -284,9 +279,6 @@ void *mymalloc(size_t requested)
 		currentblock->size = requested;
 
 		//if it fits perfectly no need for extra block for unallocated space
-	    //printf("allocated block address: %p \n", currentblock->ptr);
-		//fflush(stdout);
-
 		if(leftoverSize == 0){
 			lastAllocatedBlock = currentblock;
 			return currentblock->ptr;
