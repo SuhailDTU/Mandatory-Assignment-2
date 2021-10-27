@@ -340,10 +340,16 @@ void myfree(void* block)
 	//#############MERGING#################
 	//if block behind is unallocated merge
 	if ((currentBlock->last != NULL) && (currentBlock->last->alloc == 0)){
+
 		//make block behind us new current block save old as tmp
 		tmpBlock = currentBlock;
 		currentBlock = currentBlock->last;
 		currentBlock->size = (currentBlock->size + tmpBlock->size); //get new size
+
+		//check nextfit
+		if(tmpBlock == lastAllocatedBlock){
+			lastAllocatedBlock = currentBlock;
+		}
 
 		if(tmpBlock->next == NULL){//just remove if at end of list
 			currentBlock->next = NULL;
@@ -362,6 +368,11 @@ void myfree(void* block)
 		//designate block to be merged as tmp
 		tmpBlock = currentBlock->next;
 		currentBlock->size = ((currentBlock->size) + (tmpBlock->size));
+
+		//check nextfit
+		if(tmpBlock == lastAllocatedBlock){
+			lastAllocatedBlock = currentBlock;
+		}
 
 		if(tmpBlock->next == NULL){
 			currentBlock->next = NULL;
