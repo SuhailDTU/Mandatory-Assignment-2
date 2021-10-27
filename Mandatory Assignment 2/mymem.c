@@ -330,24 +330,24 @@ void myfree(void* block)
 
 
 	//#############MERGING#################
-	//if block behind is unallocated merge
+	//if block behind exists and is also unallocated merge
 	if ((currentBlock->last != NULL) && (currentBlock->last->alloc == 0)){
 
 		//make block behind us new current block save old as tmp
 		tmpBlock = currentBlock;
 		currentBlock = currentBlock->last;
-		currentBlock->size = (currentBlock->size + tmpBlock->size); //get new size
+		currentBlock->size = (currentBlock->size + tmpBlock->size); //get new size of merged block
 
 		//move nextfit pointer from tmp block
 		if(tmpBlock == lastAllocatedBlock){
 			lastAllocatedBlock = currentBlock;
 		}
 
-		if(tmpBlock->next == NULL){//just remove if at end of list
+		if(tmpBlock->next == NULL){//just remove tmp if at end of list
 			currentBlock->next = NULL;
 			free(tmpBlock);
 		}else{//if not at end link them together
-			//connect blocks forward and behind tmp
+			//connect blocks infront and behind tmp. Remove tmp
 			currentBlock->next = tmpBlock->next;
 			tmpBlock->next->last = currentBlock; 
 			free(tmpBlock);
@@ -355,22 +355,22 @@ void myfree(void* block)
 
 	}
 	
-	//if block infront is also unallocated also merge
+	//if block infront exists and is also unallocated also merge
 	if((currentBlock->next != NULL) && (currentBlock->next->alloc == 0)){
 		//designate block to be merged as tmp
 		tmpBlock = currentBlock->next;
-		currentBlock->size = ((currentBlock->size) + (tmpBlock->size));
+		currentBlock->size = ((currentBlock->size) + (tmpBlock->size));//get new size of merged block
 
 		//move nextfit pointer from tmp block
 		if(tmpBlock == lastAllocatedBlock){
 			lastAllocatedBlock = currentBlock;
 		}
 
-		if(tmpBlock->next == NULL){
+		if(tmpBlock->next == NULL){//just remove tmp if at end of list
 			currentBlock->next = NULL;
 			free(tmpBlock);
-		}else{
-			//connect blocks forward and behind tmp
+		}else{//if not at end link them together
+			//connect blocks infront and behind tmp. Remove tmp
 			currentBlock->next = tmpBlock->next;
 			tmpBlock->next->last = currentBlock; 
 			free(tmpBlock);
