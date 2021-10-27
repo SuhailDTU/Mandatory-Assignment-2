@@ -346,7 +346,7 @@ void myfree(void* block)
 		currentBlock = currentBlock->last;
 		currentBlock->size = (currentBlock->size + tmpBlock->size); //get new size
 
-		//check nextfit
+		//move nextfit pointer from tmp block
 		if(tmpBlock == lastAllocatedBlock){
 			lastAllocatedBlock = currentBlock;
 		}
@@ -369,7 +369,7 @@ void myfree(void* block)
 		tmpBlock = currentBlock->next;
 		currentBlock->size = ((currentBlock->size) + (tmpBlock->size));
 
-		//check nextfit
+		//move nextfit pointer from tmp block
 		if(tmpBlock == lastAllocatedBlock){
 			lastAllocatedBlock = currentBlock;
 		}
