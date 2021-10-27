@@ -4,6 +4,8 @@ would happen if they were permitted?
 2) Which function(s) need to be concerned about adjacent free blocks?
 
 3) Name one advantage of each strategy.
+they all suck
+
 
 4) Run the stress test on all strategies, and look at the results (tests.out).
 What is the significance of "Average largest free block"?  Which strategy
