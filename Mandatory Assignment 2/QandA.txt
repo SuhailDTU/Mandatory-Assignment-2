@@ -1,11 +1,26 @@
 1) Why is it so important that adjacent free blocks not be left as such?  What
 would happen if they were permitted?
 
+If adjacent free blocks aren't merged together, the system will be unable to recognize that
+it can store a single larger chunk of data across the adjacent free blocks.
+
 2) Which function(s) need to be concerned about adjacent free blocks?
 
-3) Name one advantage of each strategy.
-they all suck
+Only the myfree() function needs to concerned with them. If it always checks for adjecent free
+blocks and merge if they are found, the problem will be solved before any other functions
+have to interact with the memory.
 
+3) Name one advantage of each strategy.
+
+"Best fit" has the advantage very low wasted space, at the cost of being processor intensive.
+
+"Worst fit" causes much fewer gaps in memory, and is also processor intensive.
+
+"First fit" has the advantage of being very fast since memory is allocated as soon as
+somewhere it can fit is found. 
+
+"Next fit" has the same advantage as first fit, with the added benefit of load balancing across 
+the entire memory.
 
 4) Run the stress test on all strategies, and look at the results (tests.out).
 What is the significance of "Average largest free block"?  Which strategy
