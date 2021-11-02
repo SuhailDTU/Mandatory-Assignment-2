@@ -25,7 +25,6 @@ struct memoryList
 
 strategies myStrategy = NotSet;    // Current strategy
 
-
 size_t mySize;
 void *myMemory = NULL;
 
@@ -266,7 +265,7 @@ void *mymalloc(size_t requested)
 		}while (currentblock != lastAllocatedBlock);
 	
 		//could not find block
-		if(currentblock == lastAllocatedBlock){
+		if(currentblock == lastAllocatedBlock && currentblock->alloc == 1){
 			return NULL;
 		}
 
