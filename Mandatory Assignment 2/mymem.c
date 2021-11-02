@@ -265,14 +265,13 @@ void *mymalloc(size_t requested)
 		}while (currentblock != lastAllocatedBlock);
 	
 		//could not find block
-		if(currentblock == lastAllocatedBlock && currentblock->alloc == 1){
+		if(currentblock == lastAllocatedBlock && currentblock->alloc == 1 || currentblock->size < requested){
 			return NULL;
 		}
 
 		//##########Change size of block, allocate it and create new block with remaining memory #############
 		//leftover size
 		leftoverSize = currentblock->size - requested;
-
 		//set new size of the block, but keep same pointer
 		currentblock->alloc = 1;
 		currentblock->size = requested;
