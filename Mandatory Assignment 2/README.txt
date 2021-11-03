@@ -168,8 +168,13 @@ in how such a system is invoked (i.e. from a user's perspective)?
 8) How would you use the system you have built to implement realloc?  (Brief
 explanation; no code)
 
+  - We could search the linkedlist whether there is a block that fits the new size requirements. If there is we deallocate the current block and 
+    allocate the new block
+
 9) Which function(s) need to know which strategy is being used?  Briefly explain
 why this/these and not others.
+
+  - InitMem and myMalloc are the only funcions that needs to know the strategy. 
 
 10) Give one advantage of implementing memory management using a linked list
 over a bit array, where every bit tells whether its corresponding byte is
