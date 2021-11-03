@@ -56,6 +56,14 @@ to do it may simply be to have the user invoke the operation.
 8) How would you use the system you have built to implement realloc?  (Brief
 explanation; no code)
 
+Realloc resizes a memory block. The function takes two arguments. The first argument is 
+a pointer to the memory block that has to be resized and the other argument is the preferred 
+size of the resized memory block. The function returns a pointer to the new resized block of memory. I
+n order to implement Realloc the first step is to create a new block and specify the desired 
+size and desired address as arguments in the Realloc function. If the address is available the 
+block is initialized otherwise a null pointer is returned. Next the content of the original 
+memory block is copied into the new one. Finally the old memory block is freed.
+
 9) Which function(s) need to know which strategy is being used?  Briefly explain
 why this/these and not others.
 
