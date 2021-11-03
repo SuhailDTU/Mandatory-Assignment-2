@@ -181,4 +181,7 @@ why this/these and not others.
 over a bit array, where every bit tells whether its corresponding byte is
 allocated.
 
-test @Thomasbt @SuhailDTU
+  - With a linkedlist the size of a block can be abstract and as such we can allocate one node with a given size, instead of allocating each bit in the array manually.
+    It is therefore easier to keep track of what is allocated as you would not need to iterate through the whole array and count. It is also faster.
+    It is also easier to keep track of which groups of memory are associated as with a bit array you would have to keep sattelite values to keep track.
+
