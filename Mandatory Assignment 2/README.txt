@@ -174,7 +174,8 @@ explanation; no code)
 9) Which function(s) need to know which strategy is being used?  Briefly explain
 why this/these and not others.
 
-  - InitMem and myMalloc are the only funcions that needs to know the strategy. 
+  - InitMem and myMalloc are the only functions that needs to know the strategy. Initmem is where the memory is initialized and we declare what strategy to use.
+    myMalloc uses the declared strategy to allocate the blocks so it needs to know the strategy inorder to place them according to it.
 
 10) Give one advantage of implementing memory management using a linked list
 over a bit array, where every bit tells whether its corresponding byte is
