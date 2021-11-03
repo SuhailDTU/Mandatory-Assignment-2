@@ -111,9 +111,29 @@ Answer the following questions as part of your report
 1) Why is it so important that adjacent free blocks not be left as such?  What
 would happen if they were permitted?
 
+ - The reason it is important to merge adjecent free blocks is because the
+   allocation of blocks splits blocks to fit the requested size. If adjacent free blocks aren't merged together, the system will be unable to recognize that
+   it can store a single larger chunk of data across the adjacent free blocks.
+
+
 2) Which function(s) need to be concerned about adjacent free blocks?
 
+  - Only the myfree() function needs to concerned with them. If it always checks for adjecent free
+    blocks and merge if they are found, the problem will be solved before any other functions
+    have to interact with the memory.
+
+
 3) Name one advantage of each strategy.
+
+  - "Best fit" has the advantage very low wasted space, at the cost of being processor intensive.
+
+    "Worst fit" causes much fewer gaps in memory, and is also processor intensive.
+
+    "First fit" has the advantage of being very fast since memory is allocated as soon as
+    somewhere it can fit is found. 
+
+    "Next fit" has the same advantage as first fit, with the added benefit of load balancing across 
+    the entire memory.
 
 4) Run the stress test on all strategies, and look at the results (tests.out).
 What is the significance of "Average largest free block"?  Which strategy
@@ -123,14 +143,27 @@ generally has the best performance in this metric?  Why do you think this is?
 "Average number of small blocks"?  Which strategy generally has the best
 performance in this metric?  Why do you think this is?
 
+  - "Average number of small blocks" indicates the level of external fragmentation.
+    Best and first produces the highest numbers, worst gives a significantly lower one, 
+    and next produces the by far lowest. 
+
 6) Eventually, the many mallocs and frees produces many small blocks scattered
 across the memory pool.  There may be enough space to allocate a new block, but
 not in one place.  It is possible to compact the memory, so all the free blocks
 are moved to one large free block.  How would you implement this in the system
 you have built?
 
+ - You go through the memory with an algorithm that moves up data so there's no spaces,
+   in between blocks, and one large empty zone at the end. 
+   In practice you would have to only do this reformatting once in a while. If you were to this
+   constantly each time a change occured, it would be way too resource intensive. 
+
+
 7) If you did implement memory compaction, what changes would you need to make
 in how such a system is invoked (i.e. from a user's perspective)?
+
+  - Since reformatting the entire memory is so resource intensive, the best solution on how often
+    to do it may simply be to have the user invoke the operation.
 
 8) How would you use the system you have built to implement realloc?  (Brief
 explanation; no code)
