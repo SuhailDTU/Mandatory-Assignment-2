@@ -139,6 +139,10 @@ would happen if they were permitted?
 What is the significance of "Average largest free block"?  Which strategy
 generally has the best performance in this metric?  Why do you think this is?
 
+  - The significance of "Average largest free block" is that the larger the value is, the less fragmemtation there is. 
+    It indicates that the free memory is in larger blocks on average.
+    The best performance is by "best". This is because best actively tries to reduce fragmemtation by searching for the best fittong block.
+
 5) In the stress test results (see Question 4), what is the significance of
 "Average number of small blocks"?  Which strategy generally has the best
 performance in this metric?  Why do you think this is?
